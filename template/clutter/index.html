@@ -1,20 +1,35 @@
 {% load staticfiles %}
-<link rel="stylesheet" type="text/css" href="{% static 'sort/style.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'clutter/style.css' %}" />
+<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="{% static 'clutter/wordcloud.js' %}"></script>
 
+<form action="merge">
 <div id="prompt">
     <p>
     Categorize this: <strong>{{ item.content }}</strong>: 
     </p>
+    <div class="actions">
+        <a href="new/{{ item.id }}"><button type="button">Create New Category</button></a>
+        <input type="submit" value="Merge Selected Categories">
+    </div>
+    <hr/>
 </div>
 
-<a href="new/{{ item.id }}"><button>Create new category</button></a>
 
 <ul>
 {% for o in nodes %}
-<li><div class="cloud" cloud-id="{{ o.id }}"></div>
-<a href="insert/{{ item.id }}/{{ o.id }}"><button>Insert</button></a>
-<a href="split/{{ o.id }}"><button>Split</button></a></li>
+<li>
+<div class="actions">
+<a href="insert/{{ item.id }}/{{ o.id }}"><button type="button">Insert</button></a>
+<a href="split/{{ o.id }}"><button type="button">Split</button></a>
+Merge: <input type="checkbox" name="merge" value="{{ o.id }}">
+</div>
+<hr/>
+<div class="cloud" cloud-id="{{ o.id }}"></div>
+<span class="clear"></span>
+</li>
 {% endfor %}
 </ul>
+</form>
 
 

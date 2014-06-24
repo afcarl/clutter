@@ -26,13 +26,23 @@ class Node(models.Model):
         if not Node.objects.filter(parent=self.id):
             output = ""
             for o in Item.objects.filter(node=self.id):
-                output += str(o)
+                output += str(o) + " "
             return output
 
         output = ""
         for c in Node.objects.filter(parent=self.id):
-            output += c.get_items()
+            output += c.get_items() + " "
         return output
+
+    def depth(self):
+        if self.parent:
+            return 1 + self.parent.depth()
+        else:
+            return 1
+
+    def num_children(self):
+        return len(Node.objects.filter(parent=self))
+
 
 
 
