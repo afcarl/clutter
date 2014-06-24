@@ -1,0 +1,20 @@
+{% load staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static 'sort/style.css' %}" />
+
+<div id="prompt">
+    <p>
+    Categorize this: <strong>{{ item.content }}</strong>: 
+    </p>
+</div>
+
+<a href="new/{{ item.id }}"><button>Create new category</button></a>
+
+<ul>
+{% for o in nodes %}
+<li><div class="cloud" cloud-id="{{ o.id }}"></div>
+<a href="insert/{{ item.id }}/{{ o.id }}"><button>Insert</button></a>
+<a href="split/{{ o.id }}"><button>Split</button></a></li>
+{% endfor %}
+</ul>
+
+
