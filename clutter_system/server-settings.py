@@ -25,7 +25,7 @@ TEMPLATE_DEBUG = False
 
 
 TEMPLATE_DIRS = (
-    '/home/cmaclell/clutter/template',
+    '/home/cmaclell/clutter_system/template',
     #'/Users/cmaclell/Dropbox/projects/humansort/template',
 )
 
@@ -40,7 +40,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'sort',
+    'clutter',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -84,7 +84,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 STATICFILES_DIRS = ( 
-    '/home/cmaclell/clutter/static',
+    '/home/cmaclell/clutter_system/static',
     #'/Users/cmaclell/Dropbox/projects/humansort/static',
 )
 

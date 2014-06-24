@@ -15,9 +15,9 @@ import sys
 #site.addsitedir('/var/venv/main_site/lib/python2.7/site-packages')
 
 # Configure PYTHONPATH
-paths = ["/home/cmaclell/clutter/clutter_system/",
-         "/home/cmaclell/clutter/clutter/",
-         "/home/cmaclell/clutter/"]
+paths = ["/home/cmaclell/clutter_system/clutter_system/",
+         "/home/cmaclell/clutter_system/clutter/",
+         "/home/cmaclell/clutter_system/"]
        #"/var/venv/main_site/lib/python2.7/site-packages"]
 
 for path in paths:
@@ -28,7 +28,8 @@ for path in paths:
 
 # To fix multiple django instances on same domain.
 #os.environ.setdefault("DJANGO_SETTINGS_MODULE", "clutter.server-settings")
-os.environ["DJANGO_SETTINGS_MODULE"] = "clutter.server-settings"
+os.environ["DJANGO_SETTINGS_MODULE"] = "clutter_system.server-settings"
+
 
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
