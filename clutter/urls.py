@@ -12,8 +12,5 @@ urlpatterns = patterns('',
     url(r'^cloud/(?P<node_id>[0-9]+).json$', views.cloud, name='cloud'),
     url(r'^insert/(?P<item_id>[0-9]+)/(?P<node_id>[0-9]+)$', views.insert,
         name='insert'),
-    #url(r'^rank$', views.rank, name='rank'),
-    #url(r'^export$', views.export, name='export'),
-    #url(r'^vote/(?P<first>[0-9]+)/(?P<second>[0-9]+)/(?P<value>-?[0-9]+)$', views.vote, name='vote'),
 )
 
