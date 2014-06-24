@@ -25,7 +25,7 @@ TEMPLATE_DEBUG = False
 
 
 TEMPLATE_DIRS = (
-    '/home/cmaclell/clutter_system/template',
+    '/home/cmaclell/clutter/template',
     #'/Users/cmaclell/Dropbox/projects/humansort/template',
 )
 
@@ -84,9 +84,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 STATICFILES_DIRS = ( 
-    '/home/cmaclell/clutter_system/static',
+    '/home/cmaclell/clutter/static',
     #'/Users/cmaclell/Dropbox/projects/humansort/static',
 )
 
-STATIC_URL = '/clutter_system/static/'
+STATIC_URL = '/clutter/static/'
 
