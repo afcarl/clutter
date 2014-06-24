@@ -41,13 +41,17 @@ def index(request):
     return HttpResponse(template.render(context))
 
 def new(request, item_id):
+    parents = [o.parent.id for o in Node.objects.all() if o.parent]
+    leaves = [o.id for o in Node.objects.exclude(id__in=parents)]
     item = Item.objects.get(id__exact=item_id)
-    node = Node()
-    if item.node:
-        node.parent = item.node
-    node.save()
-    item.node = node
-    item.save()
+
+    if not item.node in leaves:
+        node = Node()
+        if item.node:
+            node.parent = item.node
+        node.save()
+        item.node = node
+        item.save()
 
     return HttpResponseRedirect(reverse('index'))
 
@@ -59,18 +63,20 @@ def insert(request, item_id, node_id):
     leaves = [o.id for o in Node.objects.exclude(id__in=parents)]
     item = Item.objects.get(id__exact=item_id)
     node = Node.objects.get(id__exact=node_id)
-    if node.id in leaves or node.depth() >= max_depth:
-        new_parent = Node(parent=node.parent)
-        new_parent.save()
-        node.parent = new_parent
-        node.save()
-        new_leaf = Node(parent=new_parent)
-        new_leaf.save()
-        item.node = new_leaf
-        item.save()
-    else:
-        item.node = node
-        item.save()
+
+    if node and not item.node in leaves:
+        if node.id in leaves or node.depth() >= max_depth:
+            new_parent = Node(parent=node.parent)
+            new_parent.save()
+            node.parent = new_parent
+            node.save()
+            new_leaf = Node(parent=new_parent)
+            new_leaf.save()
+            item.node = new_leaf
+            item.save()
+        else:
+            item.node = node
+            item.save()
 
     return HttpResponseRedirect(reverse('index'))
 
@@ -78,17 +84,17 @@ def split(request, node_id):
     """
     Given a node, split it and promote the children to the parent.
     """
-
     node = Node.objects.get(id__exact=node_id)
 
-    for c in Node.objects.filter(parent=node):
-        c.parent = node.parent
-        c.save()
-    for i in Item.objects.filter(node=node):
-        i.node = node.parent
-        i.save()
+    if node:
+        for c in Node.objects.filter(parent=node):
+            c.parent = node.parent
+            c.save()
+        for i in Item.objects.filter(node=node):
+            i.node = node.parent
+            i.save()
 
-    node.delete()
+        node.delete()
 
     return HttpResponseRedirect(reverse('index'))
 
@@ -99,17 +105,18 @@ def merge(request):
     if request.GET.getlist('merge'):
         first = Node.objects.get(id__exact=request.GET.getlist('merge')[0])
 
-        if len(request.GET.getlist('merge')) == first.parent.num_children():
-            #print("MERGED ALL THE CHILDREN!?!?")
+        if first.parent and len(request.GET.getlist('merge')) == first.parent.num_children():
             return HttpResponseRedirect(reverse('index'))
 
         new_node = Node(parent=first.parent)
         new_node.save()
+        print(new_node.parent)
         
         for i in request.GET.getlist('merge'):
             node = Node.objects.get(id__exact=i)
-            node.parent = new_node
-            node.save()
+            if node:
+                node.parent = new_node
+                node.save()
 
     return HttpResponseRedirect(reverse('index'))
 
@@ -119,9 +126,12 @@ def cloud(request, node_id):
     """
     import json
     from nltk import regexp_tokenize
-    #from nltk.stem.snowball import SnowballStemmer
+    from nltk.stem.snowball import SnowballStemmer
     from nltk.corpus import stopwords
-    #stemmer = SnowballStemmer("english")
+    stemmer = SnowballStemmer("english")
+
+    reverse_stem = {}
+
     node = Node.objects.get(id__exact=node_id)
     words = regexp_tokenize(node.get_items().lower().strip(), r"[a-z]+")
     words = [w for w in words if not w in stopwords.words('english')]
@@ -130,8 +140,14 @@ def cloud(request, node_id):
     count = 0.0
     max_count = 1.0
     for word in words:
-        s = word
-        #s = stemmer.stem(word)
+        #s = word
+        s = stemmer.stem(word)
+        if s in reverse_stem:
+            s = reverse_stem[s]
+        else:
+            reverse_stem[s] = word
+            s = word
+
         if s not in counts:
             counts[s] = 1
         else:
@@ -142,5 +158,25 @@ def cloud(request, node_id):
 
     counts = {w:(1.0 * counts[w])/count for w in counts}
     counts = [{'word': w, 'frequency': counts[w]} for w in counts]
+    print(counts)
 
     return HttpResponse(json.dumps(counts), content_type="application/json")
+
+def tree(request):
+    """
+    Return the entire tree in a JSON structure.
+    """
+    import json
+
+    output = {}
+    output['name'] = ""
+    output['children'] = [c.get_tree_structure() for c in
+                          Node.objects.filter(parent__isnull=True)]
+
+    return HttpResponse(json.dumps(output), content_type="application/json")
+
+def visualize(request):
+    template = loader.get_template('clutter/visualize.html')
+    context = RequestContext(request)
+
+    return HttpResponse(template.render(context))
