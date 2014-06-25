@@ -4,7 +4,7 @@ from django.template import RequestContext, loader
 #from django.shortcuts import render
 from clutter.models import Node, Item
 
-max_depth = 2 
+max_depth = 4
 
 # Create your views here.
 def index(request):
@@ -128,6 +128,7 @@ def cloud(request, node_id):
     from nltk import regexp_tokenize
     from nltk.stem.snowball import SnowballStemmer
     from nltk.corpus import stopwords
+    
     stemmer = SnowballStemmer("english")
 
     reverse_stem = {}
