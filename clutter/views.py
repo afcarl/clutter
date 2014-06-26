@@ -13,7 +13,15 @@ def index(request):
 
     # randomly pick non leave items
     remaining = Item.objects.exclude(node_id__in=leaves).count()
-    item = Item.objects.exclude(node_id__in=leaves).order_by("?")[0]
+
+    try:
+        item = Item.objects.exclude(node_id__in=leaves).order_by("?")[0]
+    except IndexError:
+        item = None
+        nodes = None
+        template = loader.get_template('clutter/done.html')
+        context = RequestContext(request, {})
+        return HttpResponse(template.render(context))
 
     # Force categorization of non root node items first.
     #items = Item.objects.filter(node_id__isnull=False).exclude(node_id__in=leaves).order_by("?")
@@ -21,22 +29,15 @@ def index(request):
     #    items = Item.objects.filter(node__isnull=True).order_by("?")
     #    print("showing root item")
     
-    if not item:
-        item = None
-        nodes = None
-        template = loader.get_template('clutter/done.html')
-        context = RequestContext(request, {})
-        return HttpResponse(template.render(context))
 
-    else:
         #item = items[0]
 
-        if item.node == None:
-            nodes = Node.objects.filter(parent__isnull=True).order_by('-size',
-                                                                     'text')
-        else:
-            nodes = Node.objects.filter(parent=item.node).order_by('-size',
-                                                                   'text')
+    if item.node == None:
+        nodes = Node.objects.filter(parent__isnull=True).order_by('-size',
+                                                                 'text')
+    else:
+        nodes = Node.objects.filter(parent=item.node).order_by('-size',
+                                                               'text')
 
     template = loader.get_template('clutter/index.html')
     context = RequestContext(request, {'item': item, 'nodes': nodes,
@@ -119,9 +120,24 @@ def merge(request):
     if request.GET.getlist('merge'):
         first = Node.objects.get(id__exact=request.GET.getlist('merge')[0])
 
-        if first.parent and len(request.GET.getlist('merge')) == first.parent.num_children():
-            return HttpResponseRedirect(reverse('index'))
+        #if first.parent and len(request.GET.getlist('merge')) == first.parent.num_children():
+        #    parent = first.parent
+        #    for child in request.GET.getlist('merge'):
+        #        for item in Item.objects.filter(node_id=child):
+        #            print(item.content + "being promoted!")
+        #            item.node = parent
+        #            item.save()
+        #            #parent.text += " " + item.content
+        #        for subchild in Node.objects.filter(parent_id=child):
+        #            print("child being promoted")
+        #            subchild.parent = parent
+        #            subchild.save()
+        #    for node in Node.objects.filter(id__in=request.GET.getlist('merge')):
+        #        print('deleteting unnecessary cluster')
+        #        node.delete()
+        #    parent.save()
 
+        #else:
         new_node = Node(parent=first.parent)
         new_node.save()
         #print(new_node.parent)

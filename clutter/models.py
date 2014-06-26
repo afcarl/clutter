@@ -48,7 +48,8 @@ class Node(models.Model):
     def get_tree_structure(self):
         output = {}
         if not Node.objects.filter(parent=self):
-            output['name'] = str(Item.objects.filter(node=self)[0])
+            #output['name'] = str(Item.objects.filter(node=self)[0])
+            output['name'] = str(self.text)
             output['size'] = len(Item.objects.filter(node=self))
         else:
             output['name'] = ""
