@@ -12,7 +12,8 @@ def index(request):
     leaves = [o.id for o in Node.objects.exclude(id__in=parents)]
 
     # randomly pick non leave items
-    items = Item.objects.exclude(node_id__in=leaves).order_by("?")
+    remaining = Item.objects.exclude(node_id__in=leaves).count()
+    items = Item.objects.exclude(node_id__in=leaves).order_by("?")[0]
 
     # Force categorization of non root node items first.
     #items = Item.objects.filter(node_id__isnull=False).exclude(node_id__in=leaves).order_by("?")
@@ -39,7 +40,7 @@ def index(request):
 
     template = loader.get_template('clutter/index.html')
     context = RequestContext(request, {'item': item, 'nodes': nodes,
-                                       'remaining': len(items)})
+                                       'remaining': remaining})
 
     return HttpResponse(template.render(context))
 
