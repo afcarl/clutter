@@ -38,7 +38,8 @@ def index(request):
                                                                    'text')
 
     template = loader.get_template('clutter/index.html')
-    context = RequestContext(request, {'item': item, 'nodes': nodes})
+    context = RequestContext(request, {'item': item, 'nodes': nodes,
+                                       'remaining': len(items)})
 
     return HttpResponse(template.render(context))
 
