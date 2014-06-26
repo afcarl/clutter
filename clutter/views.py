@@ -31,9 +31,11 @@ def index(request):
         item = items[0]
 
         if item.node == None:
-            nodes = Node.objects.filter(parent__isnull=True).order_by("?")
+            nodes = Node.objects.filter(parent__isnull=True).order_by('-size',
+                                                                     'text')
         else:
-            nodes = Node.objects.filter(parent=item.node).order_by("?")
+            nodes = Node.objects.filter(parent=item.node).order_by('-size',
+                                                                   'text')
 
     template = loader.get_template('clutter/index.html')
     context = RequestContext(request, {'item': item, 'nodes': nodes})
@@ -47,6 +49,8 @@ def new(request, item_id):
 
     if not item.node in leaves:
         node = Node()
+        node.text = item.content
+        node.size += 1
         if item.node:
             node.parent = item.node
         node.save()
@@ -67,16 +71,24 @@ def insert(request, item_id, node_id):
     if node and not item.node in leaves:
         if node.id in leaves or node.depth() >= max_depth:
             new_parent = Node(parent=node.parent)
+            new_parent.text = node.text + " " + item.content
+            new_parent.size = node.size + 1
             new_parent.save()
             node.parent = new_parent
             node.save()
+
             new_leaf = Node(parent=new_parent)
+            new_leaf.text = item.content
+            new_leaf.size += 1
             new_leaf.save()
             item.node = new_leaf
             item.save()
         else:
             item.node = node
+            node.text = node.text + " " + item.content
+            node.size += 1
             item.save()
+            node.save()
 
     return HttpResponseRedirect(reverse('index'))
 
@@ -110,13 +122,17 @@ def merge(request):
 
         new_node = Node(parent=first.parent)
         new_node.save()
-        print(new_node.parent)
+        #print(new_node.parent)
         
         for i in request.GET.getlist('merge'):
             node = Node.objects.get(id__exact=i)
             if node:
                 node.parent = new_node
                 node.save()
+                new_node.text = new_node.text + " " + node.text
+                new_node.size += node.size
+
+        new_node.save()
 
     return HttpResponseRedirect(reverse('index'))
 
@@ -159,7 +175,7 @@ def cloud(request, node_id):
 
     counts = {w:(1.0 * counts[w])/count for w in counts}
     counts = [{'word': w, 'frequency': counts[w]} for w in counts]
-    print(counts)
+    #print(counts)
 
     return HttpResponse(json.dumps(counts), content_type="application/json")
 

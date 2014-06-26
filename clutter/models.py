@@ -13,6 +13,8 @@ class Item(models.Model):
 class Node(models.Model):
     parent = models.ForeignKey("Node", null=True, blank=True,
                                related_name="children")
+    text = models.TextField()
+    size = models.IntegerField(default=0)
 
     def __str__(self):
         return self.children
@@ -23,13 +25,16 @@ class Node(models.Model):
         return output
 
     def get_items(self):
-        output = ""
-        for o in Item.objects.filter(node=self.id):
-            output += str(o) + " "
+        return self.text
+    
+    #def get_items(self):
+    #    output = ""
+    #    for o in Item.objects.filter(node=self.id):
+    #        output += str(o) + " "
 
-        for c in Node.objects.filter(parent=self.id):
-            output += c.get_items() + " "
-        return output
+    #    for c in Node.objects.filter(parent=self.id):
+    #        output += c.get_items() + " "
+    #    return output
 
     def depth(self):
         if self.parent:
