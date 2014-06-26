@@ -2,9 +2,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.template import RequestContext, loader
 #from django.shortcuts import render
-from clutter.models import Node, Item
-
-max_depth = 4
+from clutter.models import Node, Item, max_depth
 
 # Create your views here.
 def index(request):

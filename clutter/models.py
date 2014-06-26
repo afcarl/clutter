@@ -1,5 +1,6 @@
 from django.db import models
 
+max_depth = 4
 # Create your models here.
 
 class Item(models.Model):
@@ -56,6 +57,13 @@ class Node(models.Model):
             output['children'] = [c.get_tree_structure() for c in Node.objects.filter(parent=self)]
             output['children'] += [{'name': i.content, 'size': 1} for i in
              Item.objects.filter(node=self)]
+
+            max_depth_nodes = [n for n in Node.objects.all() if n.depth ==
+                               max_depth and n.parent == self]
+
+            output['children'] += [{'name': n.text, 'size': n.size} for n in
+                                   max_depth_nodes]
+
         return output
         
 
