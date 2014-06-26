@@ -13,7 +13,7 @@ def index(request):
 
     # randomly pick non leave items
     remaining = Item.objects.exclude(node_id__in=leaves).count()
-    items = Item.objects.exclude(node_id__in=leaves).order_by("?")[0]
+    item = Item.objects.exclude(node_id__in=leaves).order_by("?")[0]
 
     # Force categorization of non root node items first.
     #items = Item.objects.filter(node_id__isnull=False).exclude(node_id__in=leaves).order_by("?")
@@ -21,7 +21,7 @@ def index(request):
     #    items = Item.objects.filter(node__isnull=True).order_by("?")
     #    print("showing root item")
     
-    if not items:
+    if not item:
         item = None
         nodes = None
         template = loader.get_template('clutter/done.html')
@@ -29,7 +29,7 @@ def index(request):
         return HttpResponse(template.render(context))
 
     else:
-        item = items[0]
+        #item = items[0]
 
         if item.node == None:
             nodes = Node.objects.filter(parent__isnull=True).order_by('-size',
