@@ -143,15 +143,33 @@ def cloud(request, node_id):
     import json
     from nltk import regexp_tokenize
     from nltk.stem.snowball import SnowballStemmer
-    from nltk.corpus import stopwords
+    #from nltk.corpus import stopwords
     
+    stopwords = ['i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves',
+                 'you', 'your', 'yours', 'yourself', 'yourselves', 'he', 'him',
+                 'his', 'himself', 'she', 'her', 'hers', 'herself', 'it',
+                 'its', 'itself', 'they', 'them', 'their', 'theirs',
+                 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that',
+                 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be',
+                 'been', 'being', 'have', 'has', 'had', 'having', 'do', 'does',
+                 'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if', 'or',
+                 'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for',
+                 'with', 'about', 'against', 'between', 'into', 'through',
+                 'during', 'before', 'after', 'above', 'below', 'to', 'from',
+                 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under',
+                 'again', 'further', 'then', 'once', 'here', 'there', 'when',
+                 'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few',
+                 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not',
+                 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't',
+                 'can', 'will', 'just', 'don', 'should', 'now']
     stemmer = SnowballStemmer("english")
-
     reverse_stem = {}
 
     node = Node.objects.get(id__exact=node_id)
-    words = regexp_tokenize(node.get_items().lower().strip(), r"[a-z]+")
-    words = [w for w in words if not w in stopwords.words('english')]
+
+    #words = regexp_tokenize(node.get_items().lower().strip(), r"[a-z]+")
+    words = [w for w in regexp_tokenize(node.get_items().lower().strip(),
+                                        r"[a-z]+") if not w in stopwords]
 
     counts = {}
     count = 0.0
@@ -173,8 +191,8 @@ def cloud(request, node_id):
                 max_count = counts[s]
         count += 1
 
-    counts = {w:(1.0 * counts[w])/count for w in counts}
-    counts = [{'word': w, 'frequency': counts[w]} for w in counts]
+    #counts = {w:(1.0 * counts[w])/count for w in counts}
+    counts = [{'word': w, 'frequency': 1.0 * counts[w] / count} for w in counts]
     #print(counts)
 
     return HttpResponse(json.dumps(counts), content_type="application/json")
