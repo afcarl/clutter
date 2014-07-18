@@ -1,1 +1,33 @@
-All done for now!
+{% load staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static 'clutter/style.css' %}" />
+<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="{% static 'clutter/wordcloud.js' %}"></script>
+
+<form action="merge">
+<div id="prompt">
+    <p>If applicable, merge or split the selected categories</p>
+    <div class="actions">
+        <button type="submit">Merge Selected Categories</button>
+        <a href="/"><button type="button">Looks good!</button></a>
+    </div>
+    <hr/>
+</div>
+
+
+<ul>
+{% for o in nodes %}
+<li>
+<div class="actions">
+<a href="split/{{ o.id }}"><button type="button">Split</button></a>
+Merge: <input type="checkbox" name="merge" value="{{ o.id }}">
+</div>
+<hr/>
+<div class="cloud" cloud-id="{{ o.id }}"></div>
+<span class="clear"></span>
+</li>
+{% endfor %}
+</ul>
+</form>
+
+
+

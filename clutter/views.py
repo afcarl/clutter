@@ -3,6 +3,7 @@ from django.core.urlresolvers import reverse
 from django.template import RequestContext, loader
 #from django.shortcuts import render
 from clutter.models import Node, Item, max_depth
+import random
 
 # Create your views here.
 def index(request):
@@ -16,9 +17,12 @@ def index(request):
         item = Item.objects.exclude(node_id__in=leaves).order_by("?")[0]
     except IndexError:
         item = None
-        nodes = None
+        parents.append(None)
+        parent = random.choice(parents)
+        nodes = Node.objects.filter(parent__id=parent).order_by('-size',
+                                                                'text')
         template = loader.get_template('clutter/done.html')
-        context = RequestContext(request, {})
+        context = RequestContext(request, {'nodes': nodes})
         return HttpResponse(template.render(context))
 
     # Force categorization of non root node items first.
@@ -48,16 +52,18 @@ def new(request, item_id):
     leaves = [o.id for o in Node.objects.exclude(id__in=parents)]
     item = Item.objects.get(id__exact=item_id)
 
+    #TODO do we need to trim up things beyond the desired depth?
+
     if not item.node in leaves:
         node = Node()
         node.text = item.content
-        node.size += 1
+        node.size = 1
         if item.node:
             node.parent = item.node
         node.save()
         item.node = node
         item.save()
-
+        
     return HttpResponseRedirect(reverse('index'))
 
 def insert(request, item_id, node_id):
@@ -70,7 +76,8 @@ def insert(request, item_id, node_id):
     node = Node.objects.get(id__exact=node_id)
 
     if node and not item.node in leaves:
-        if node.id in leaves or node.depth() >= max_depth:
+        if node.id in leaves and node.depth() < max_depth:
+            print("FRINGE SPLIT")
             new_parent = Node(parent=node.parent)
             new_parent.text = node.text + " " + item.content
             new_parent.size = node.size + 1
@@ -84,12 +91,15 @@ def insert(request, item_id, node_id):
             new_leaf.save()
             item.node = new_leaf
             item.save()
+
+            new_parent.prune()
         else:
             item.node = node
             node.text = node.text + " " + item.content
             node.size += 1
             item.save()
             node.save()
+
 
     return HttpResponseRedirect(reverse('index'))
 
@@ -104,7 +114,10 @@ def split(request, node_id):
             c.parent = node.parent
             c.save()
         for i in Item.objects.filter(node=node):
-            i.node = node.parent
+            if node.parent:
+                i.node = node.parent
+            else:
+                i.node = None
             i.save()
 
         node.delete()
@@ -136,10 +149,11 @@ def merge(request):
         #    parent.save()
 
         #else:
+
         new_node = Node(parent=first.parent)
         new_node.save()
         #print(new_node.parent)
-        
+
         for i in request.GET.getlist('merge'):
             node = Node.objects.get(id__exact=i)
             if node:
@@ -149,6 +163,7 @@ def merge(request):
                 new_node.size += node.size
 
         new_node.save()
+        new_node.prune()
 
     return HttpResponseRedirect(reverse('index'))
 
