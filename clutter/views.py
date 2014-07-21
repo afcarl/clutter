@@ -63,6 +63,12 @@ def new(request, item_id):
         node.save()
         item.node = node
         item.save()
+        if node.parent:
+            node.parent.prune()
+        else:
+            for n in Node.objects.filter(parent__isnull=True):
+                n.prune()
+
         
     return HttpResponseRedirect(reverse('index'))
 

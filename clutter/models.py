@@ -1,6 +1,6 @@
 from django.db import models
 
-max_depth = 1
+max_depth = 3
 # Create your models here.
 
 class Item(models.Model):
@@ -35,7 +35,6 @@ class Node(models.Model):
                 for item in Item.objects.filter(node=child):
                     item.node = self
                     item.save()
-                print("deleting: " + child.text)
                 child.delete()
                 
 
