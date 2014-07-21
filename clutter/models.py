@@ -29,9 +29,11 @@ class Node(models.Model):
         return output
 
     def prune(self):
+        for child in Node.objects.filter(parent=self):
+            child.prune()
+
         if self.depth() >= max_depth:
             for child in Node.objects.filter(parent=self):
-                child.prune()
                 for item in Item.objects.filter(node=child):
                     item.node = self
                     item.save()
