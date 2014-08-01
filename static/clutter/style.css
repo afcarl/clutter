@@ -49,3 +49,7 @@ li{
 p {
     margin-bottom: 0px;
 }
+
+.item {
+    height: 300px;
+}

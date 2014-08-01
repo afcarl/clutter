@@ -56,7 +56,8 @@ def new(request, item_id):
 
     if not item.node in leaves:
         node = Node()
-        node.text = item.content
+        if item.content:
+            node.text = item.content
         node.size = 1
         if item.node:
             node.parent = item.node
@@ -85,7 +86,8 @@ def insert(request, item_id, node_id):
         if node.id in leaves and node.depth() < max_depth:
             print("FRINGE SPLIT")
             new_parent = Node(parent=node.parent)
-            new_parent.text = node.text + " " + item.content
+            if node.text or item.content:
+                new_parent.text = node.text + " " + item.content
             new_parent.size = node.size + 1
             new_parent.save()
             node.parent = new_parent
@@ -101,7 +103,8 @@ def insert(request, item_id, node_id):
             new_parent.prune()
         else:
             item.node = node
-            node.text = node.text + " " + item.content
+            if node.text or item.content:
+                node.text = node.text + " " + item.content
             node.size += 1
             item.save()
             node.save()
@@ -165,7 +168,8 @@ def merge(request):
             if node:
                 node.parent = new_node
                 node.save()
-                new_node.text = new_node.text + " " + node.text
+                if new_node.text or node.text:
+                    new_node.text = new_node.text + " " + node.text
                 new_node.size += node.size
 
         new_node.save()
@@ -203,6 +207,11 @@ def cloud(request, node_id):
     reverse_stem = {}
 
     node = Node.objects.get(id__exact=node_id)
+
+    items = node.get_items()
+
+    if isinstance(items, list):
+        return HttpResponse(json.dumps(items), content_type="application/json")
 
     #words = regexp_tokenize(node.get_items().lower().strip(), r"[a-z]+")
     words = [w for w in regexp_tokenize(node.get_items().lower().strip(),

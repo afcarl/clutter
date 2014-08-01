@@ -9,8 +9,16 @@
 <form action="merge">
 <div id="prompt">
     <p>
-    Categorize this: <strong>{{ item.content }}</strong>: 
+    Categorize this: 
+    {% if item.image %}
     </p>
+    <img class="item" src="{{ item.image }}">
+    {% else %}
+    <strong>
+        {{ item.content }}
+    </strong>: 
+    </p>
+    {% endif %}
     <div class="actions">
         <a href="new/{{ item.id }}"><button type="button">Create New Category</button></a>
         <button type="submit">Merge Selected Categories</button>

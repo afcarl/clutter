@@ -1,10 +1,11 @@
 from django.db import models
 
-max_depth = 3
+max_depth = 2 
 # Create your models here.
 
 class Item(models.Model):
     content = models.CharField(max_length=200)
+    image = models.ImageField(upload_to='images')
     node = models.ForeignKey("Node", null=True, blank=True,
                              related_name="items")
 
@@ -41,16 +42,20 @@ class Node(models.Model):
                 
 
     def get_items(self):
-        return self.text
-    
-    #def get_items(self):
-    #    output = ""
-    #    for o in Item.objects.filter(node=self.id):
-    #        output += str(o) + " "
+        if self.text:
+            return self.text
 
-    #    for c in Node.objects.filter(parent=self.id):
-    #        output += c.get_items() + " "
-    #    return output
+        if Item.objects.filter(node=self.id).count() > 0:
+            return [Item.objects.filter(node=self.id).order_by('?')[0].image.url]
+        else:
+            return Node.objects.filter(parent=self.id).order_by('?')[0].get_items()
+        #for o in Item.objects.filter(node=self.id):
+        #    output.append(o.image.url)
+
+        #for c in Node.objects.filter(parent=self.id):
+        #    output += c.get_items()
+            
+        return output
 
     def depth(self):
         if self.parent:
@@ -65,7 +70,7 @@ class Node(models.Model):
         output = {}
         output['name'] = ""
         output['children'] = [c.get_tree_structure() for c in Node.objects.filter(parent=self)]
-        output['children'] += [{'name': i.content, 'size': 1} for i in
+        output['children'] += [{'name': i.content, 'image': i.image.url, 'size': 1} for i in
          Item.objects.filter(node=self)]
 
         return output
