@@ -21,15 +21,14 @@ $(function(){
                 if (!data[0]['word']){
                     var img = $('<img src="' + data[0] + '" />');
                     $(new_node).prepend(img);
-                    console.log(img.width());
-                    console.log(img.height());
-                    console.log();
-                    if (img.width() > img.height()){
-                        $(img).css('width', '170px');
-                    }
-                    else{
-                        $(img).css('height', '170px');
-                    }
+                    img.load(function(){
+                        if (img.width() > img.height()){
+                            $(img).css('width', '170px');
+                        }
+                        else{
+                            $(img).css('height', '170px');
+                        }
+                    });
                 }
                 else{
                     $.each(data, function(index ,word_object){
