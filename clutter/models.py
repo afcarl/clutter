@@ -54,8 +54,6 @@ class Node(models.Model):
 
         #for c in Node.objects.filter(parent=self.id):
         #    output += c.get_items()
-            
-        return output
 
     def depth(self):
         if self.parent:
