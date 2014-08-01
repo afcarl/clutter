@@ -18,10 +18,12 @@ $(function(){
                 node = new_node;
 
                 data.sort(function(a,b){return b['frequency'] - a['frequency'];});
-                console.log(data);
                 if (!data[0]['word']){
-                    img = $('<img src="' + data[0] + '" />');
+                    var img = $('<img src="' + data[0] + '" />');
                     $(new_node).prepend(img);
+                    console.log(img.width());
+                    console.log(img.height());
+                    console.log();
                     if (img.width() > img.height()){
                         $(img).css('width', '170px');
                     }
