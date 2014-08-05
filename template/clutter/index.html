@@ -6,41 +6,44 @@
     console.log("remaining: {{ remaining }}");
 </script>
 
-<form action="merge">
-<div id="prompt">
-    <p>
-    Categorize this: 
-    {% if item.image %}
-    </p>
-    <img class="item" src="{{ item.image }}">
-    {% else %}
-    <strong>
-        {{ item.content }}
-    </strong>: 
-    </p>
-    {% endif %}
-    <div class="actions">
-        <a href="new/{{ item.id }}"><button type="button">Create New Category</button></a>
-        <button type="submit">Merge Selected Categories</button>
+<form action="process_action">
+    <div id="prompt">
+        <p>
+        Categorize this: 
+        {% if item.image %}
+        </p>
+        <img class="item" src="{{ item.image }}">
+        {% else %}
+        <strong>
+            {{ item.content }}
+        </strong>: 
+        </p>
+        {% endif %}
+        <div class="actions">
+            <a href="new/{{ item.id }}"><button type="button">Create New Category</button></a>
+            <button type="submit" name="insert" value="{{ item.id }}">Insert into Selected Categories</button>
+            <button type="submit" name="split" value="true">Split Selected Categories</button>
+        </div>
+        <hr/>
     </div>
-    <hr/>
-</div>
 
 
-<ul>
-{% for o in nodes %}
-<li>
-<div class="actions">
-<a href="insert/{{ item.id }}/{{ o.id }}"><button type="button">Insert</button></a>
-<a href="split/{{ o.id }}"><button type="button">Split</button></a>
-Merge: <input type="checkbox" name="merge" value="{{ o.id }}">
-</div>
-<hr/>
-<div class="cloud" cloud-id="{{ o.id }}"></div>
-<span class="clear"></span>
-</li>
-{% endfor %}
-</ul>
+    <ul>
+        {% for o in nodes %}
+        <li>
+        <div class="actions">
+            <!--
+            <a href="insert/{{ item.id }}/{{ o.id }}"><button type="button">Insert</button></a>
+            <a href="split/{{ o.id }}"><button type="button">Split</button></a>
+            -->
+            Select Category: <input type="checkbox" name="clusters" value="{{ o.id }}">
+        </div>
+        <hr/>
+        <div class="cloud" cloud-id="{{ o.id }}"></div>
+        <span class="clear"></span>
+        </li>
+        {% endfor %}
+    </ul>
 </form>
 
 

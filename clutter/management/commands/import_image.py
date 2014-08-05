@@ -14,6 +14,7 @@ class Command(BaseCommand):
         onlyfiles = [f for f in listdir(images_path) if isfile(join(images_path, f))]
 
         for f in onlyfiles:
-            item = Item(image=join(images_path, f))
-            item.save()
-            print(join(images_path, f))
+            if f.split('.')[-1] == 'png':
+                item = Item(image=join(images_path, f))
+                item.save()
+                print(join(images_path, f))

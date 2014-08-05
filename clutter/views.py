@@ -110,7 +110,7 @@ def insert(request, item_id, node_id):
             node.save()
 
 
-    return HttpResponseRedirect(reverse('index'))
+    #return HttpResponseRedirect(reverse('index'))
 
 def split(request, node_id):
     """
@@ -130,6 +130,65 @@ def split(request, node_id):
             i.save()
 
         node.delete()
+
+    #return HttpResponseRedirect(reverse('index'))
+
+def process_action(request):
+    """
+    Given two nodes, merge them.
+    """
+    if (request.GET.getlist('split') and request.GET.getlist('clusters') and
+        len(request.GET.getlist('clusters')) > 0):
+        for i in request.GET.getlist('clusters'):
+            split(request, i)
+        return HttpResponseRedirect(reverse('index'))
+
+    if (request.GET.getlist('clusters') and 
+        len(request.GET.getlist('clusters')) > 1):
+        first = Node.objects.get(id__exact=request.GET.getlist('clusters')[0])
+
+        #if first.parent and len(request.GET.getlist('merge')) == first.parent.num_children():
+        #    parent = first.parent
+        #    for child in request.GET.getlist('merge'):
+        #        for item in Item.objects.filter(node_id=child):
+        #            print(item.content + "being promoted!")
+        #            item.node = parent
+        #            item.save()
+        #            #parent.text += " " + item.content
+        #        for subchild in Node.objects.filter(parent_id=child):
+        #            print("child being promoted")
+        #            subchild.parent = parent
+        #            subchild.save()
+        #    for node in Node.objects.filter(id__in=request.GET.getlist('merge')):
+        #        print('deleteting unnecessary cluster')
+        #        node.delete()
+        #    parent.save()
+
+        #else:
+
+        new_node = Node(parent=first.parent)
+        new_node.save()
+        #print(new_node.parent)
+
+        for i in request.GET.getlist('clusters'):
+            node = Node.objects.get(id__exact=i)
+            if node:
+                node.parent = new_node
+                node.save()
+                if new_node.text or node.text:
+                    new_node.text = new_node.text + " " + node.text
+                new_node.size += node.size
+
+        new_node.save()
+        new_node.prune()
+
+    elif (request.GET.getlist('clusters') and 
+          len(request.GET.getlist('clusters')) > 0):
+        new_node = Node.objects.get(id__exact=request.GET.getlist('clusters')[0])
+
+    if new_node and request.GET.getlist('insert'):
+        insert(request, request.GET.getlist('insert')[0], new_node.id)
+        
 
     return HttpResponseRedirect(reverse('index'))
 

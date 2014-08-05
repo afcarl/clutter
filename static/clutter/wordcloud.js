@@ -19,15 +19,17 @@ $(function(){
 
                 data.sort(function(a,b){return b['frequency'] - a['frequency'];});
                 if (!data[0]['word']){
-                    var img = $('<img src="' + data[0] + '" />');
-                    $(new_node).prepend(img);
-                    img.load(function(){
-                        if (img.width() > img.height()){
-                            $(img).css('width', '170px');
-                        }
-                        else{
-                            $(img).css('height', '170px');
-                        }
+                    $.each(data, function(index, image_object){
+                        var img = $('<img src="' + image_object + '" />');
+                        $(new_node).prepend(img);
+                        img.load(function(){
+                            if (img.width() > img.height()){
+                                $(img).css('width', (170 / data.length) + 'px');
+                            }
+                            else{
+                                $(img).css('height', (170 / data.length) + 'px');
+                            }
+                        });
                     });
                 }
                 else{

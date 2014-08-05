@@ -45,6 +45,26 @@ class Node(models.Model):
         if self.text:
             return self.text
 
+        if Node.objects.filter(parent=self.id).count() > 0:
+            return [node.get_item() for node in
+                    Node.objects.filter(parent=self.id).order_by("?")]
+        else:
+            return self.get_item()
+
+        #if Item.objects.filter(node=self.id).count() > 0:
+        #    return [Item.objects.filter(node=self.id).order_by('?')[0].image.url]
+        #else:
+        #    return Node.objects.filter(parent=self.id).order_by('?')[0].get_items()
+        #for o in Item.objects.filter(node=self.id):
+        #    output.append(o.image.url)
+
+        #for c in Node.objects.filter(parent=self.id):
+        #    output += c.get_items()
+
+    def get_item(self):
+        #if self.text:
+        #    return self.text
+
         if Item.objects.filter(node=self.id).count() > 0:
             return [Item.objects.filter(node=self.id).order_by('?')[0].image.url]
         else:
