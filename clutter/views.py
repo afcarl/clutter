@@ -14,7 +14,7 @@ def index(request):
     else:
         count = 0.0
 
-    keys = [hash((addr + ":" + str(i))) for i in range(10,101,10) if i <= count]
+    keys = [hash((addr + ":" + str(i))) for i in range(10,1001,25) if i <= count]
 
     parents = [o.parent.id for o in Node.objects.all() if o.parent]
     leaves = [o.id for o in Node.objects.exclude(id__in=parents)]
