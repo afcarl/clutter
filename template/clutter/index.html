@@ -2,10 +2,18 @@
 <link rel="stylesheet" type="text/css" href="{% static 'clutter/style.css' %}" />
 <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
 <script src="{% static 'clutter/wordcloud.js' %}"></script>
+<script src="{% static 'clutter/work.js' %}"></script>
 <script type="text/javascript">
+    var count = {{ count }};
+    var addr = "{{ addr }}";
+    var keys = "{{ keys }}";
     console.log("remaining: {{ remaining }}");
+    console.log("count: {{ count }}");
 </script>
 
+<div id="progress">
+</div>
+<hr>
 <form action="process_action">
     <div id="prompt">
         <p>

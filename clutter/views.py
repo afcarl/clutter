@@ -2,11 +2,20 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.template import RequestContext, loader
 #from django.shortcuts import render
-from clutter.models import Node, Item, max_depth
+from clutter.models import Worker, Node, Item, max_depth
 import random
 
 # Create your views here.
 def index(request):
+    addr = request.META.get('REMOTE_ADDR') 
+    if Worker.objects.filter(addr=addr).count() > 0:
+        print("FOUND SOMETHING...")
+        count = Worker.objects.filter(addr=addr)[0].count
+    else:
+        count = 0.0
+
+    keys = [hash((addr + ":" + str(i))) for i in range(10,101,10) if i <= count]
+
     parents = [o.parent.id for o in Node.objects.all() if o.parent]
     leaves = [o.id for o in Node.objects.exclude(id__in=parents)]
 
@@ -22,7 +31,10 @@ def index(request):
         nodes = Node.objects.filter(parent__id=parent).order_by('-size',
                                                                 'text')
         template = loader.get_template('clutter/done.html')
-        context = RequestContext(request, {'nodes': nodes})
+        context = RequestContext(request, {'nodes': nodes,
+                                           'addr': addr,
+                                           'keys': keys,
+                                           'count': count})
         return HttpResponse(template.render(context))
 
     # Force categorization of non root node items first.
@@ -42,10 +54,22 @@ def index(request):
                                                                'text')
 
     template = loader.get_template('clutter/index.html')
-    context = RequestContext(request, {'item': item, 'nodes': nodes,
-                                       'remaining': remaining})
+    context = RequestContext(request, {'item': item, 'nodes': nodes, 'count':
+                                       count, 'remaining': remaining, 'addr':
+                                       addr, 'keys': keys})
 
     return HttpResponse(template.render(context))
+
+def increment_user(request):
+    addr = request.META.get('REMOTE_ADDR') 
+    if Worker.objects.filter(addr=addr).count() > 0:
+        user = Worker.objects.filter(addr=addr)[0]
+    else:
+        user = Worker()
+        user.addr = addr
+        user.save()
+    user.count = user.count + 1
+    user.save()
 
 def new(request, item_id):
     parents = [o.parent.id for o in Node.objects.all() if o.parent]
@@ -53,7 +77,6 @@ def new(request, item_id):
     item = Item.objects.get(id__exact=item_id)
 
     #TODO do we need to trim up things beyond the desired depth?
-
     if not item.node in leaves:
         node = Node()
         if item.content:
@@ -69,8 +92,9 @@ def new(request, item_id):
         else:
             for n in Node.objects.filter(parent__isnull=True):
                 n.prune()
-
         
+    increment_user(request)
+
     return HttpResponseRedirect(reverse('index'))
 
 def insert(request, item_id, node_id):
@@ -141,6 +165,7 @@ def process_action(request):
         len(request.GET.getlist('clusters')) > 0):
         for i in request.GET.getlist('clusters'):
             split(request, i)
+        increment_user(request)
         return HttpResponseRedirect(reverse('index'))
 
     if (request.GET.getlist('clusters') and 
@@ -190,6 +215,7 @@ def process_action(request):
         insert(request, request.GET.getlist('insert')[0], new_node.id)
         
 
+    increment_user(request)
     return HttpResponseRedirect(reverse('index'))
 
 def merge(request):

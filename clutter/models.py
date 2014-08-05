@@ -3,8 +3,12 @@ from django.db import models
 max_depth = 2 
 # Create your models here.
 
+class Worker(models.Model):
+    addr = models.CharField(max_length=200)
+    count = models.IntegerField(default=0)
+
 class Item(models.Model):
-    content = models.CharField(max_length=200)
+    content = models.TextField()
     image = models.ImageField(upload_to='images')
     node = models.ForeignKey("Node", null=True, blank=True,
                              related_name="items")
